@@ -1,3 +1,6 @@
+
+Use this repo/folder as a team for demo purposes of real time tracking of changes to file. Run git diff script here
+
 cd /path/to/your-project   # ← THIS determines what's tracked
 node /path/to/podman/scripts/podman-agent.mjs --name alice --pod demo-pod
 
