@@ -1,0 +1,449 @@
+/* ============================================================
+   PodBoard — Light Theme Kanban
+   CSS variables → reset → layout → header → sidebar →
+   board → task-card → loading
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root {
+  /* Palette */
+  --bg:            #f0f2f5;
+  --surface:       #ffffff;
+  --surface-muted: #f5f6f8;
+  --border:        #e2e5ea;
+  --border-strong: #c8cdd6;
+
+  /* Text */
+  --text:          #111827;
+  --text-muted:    #5a6478;
+  --text-faint:    #9ba5b7;
+
+  /* Accent — slate-indigo */
+  --accent:        #4f46e5;
+  --accent-soft:   #eeecfd;
+  --accent-hover:  #4338ca;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.07), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 4px 14px rgba(16, 24, 40, 0.10), 0 2px 4px rgba(16, 24, 40, 0.05);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* Chrome */
+  --header-height: 62px;
+  --sidebar-width: 232px;
+
+  /* Font */
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ── Layout shell ───────────────────────────────────────── */
+/*
+  .layout          — full-height flex column (header + body)
+  .layout-body     — flex row (sidebar + main)
+  .layout-main     — scrollable content area
+*/
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.layout-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.layout-main {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: var(--bg);
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+/*
+  .header          — sticky top bar
+  .header-title    — app title h1
+  .header-members  — avatar list ul
+  .member-pill     — individual avatar li
+*/
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--header-height);
+  padding: 0 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  /* subtle brand accent on the dot */
+  background: linear-gradient(135deg, var(--text) 60%, var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-members {
+  display: flex;
+  align-items: center;
+  /* negative margin creates overlapping stack */
+}
+
+.header-members .member-pill {
+  margin-left: -8px;
+  border: 2px solid var(--surface);
+}
+
+.header-members .member-pill:first-child {
+  margin-left: 0;
+}
+
+.member-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-transform: uppercase;
+  user-select: none;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  /* backgroundColor comes from inline style on the element */
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.member-pill:hover {
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: var(--shadow-md);
+  z-index: 1;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+/*
+  .sidebar             — left nav rail
+  .sidebar-list        — ul of column links
+  .sidebar-item        — button for each column
+  .sidebar-item-active — applied alongside sidebar-item when selected
+  .sidebar-item-title  — column name span
+  .sidebar-item-count  — task count badge span
+*/
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 10px;
+  overflow-y: auto;
+}
+
+.sidebar::before {
+  content: 'COLUMNS';
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  padding: 0 10px 10px;
+}
+
+.sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sidebar-item:hover {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.sidebar-item:hover .sidebar-item-count {
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.sidebar-item-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.sidebar-item-active:hover {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+
+.sidebar-item-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-item-count {
+  flex-shrink: 0;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  text-align: center;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.sidebar-item-active .sidebar-item-count {
+  background: rgba(79, 70, 229, 0.14);
+  color: var(--accent);
+}
+
+/* ── Board ──────────────────────────────────────────────── */
+/*
+  .board                — horizontal flex row of columns
+  .board__column        — individual column section
+  .board__column-header — column header bar
+  .board__column-title  — column h2 name
+  .board__column-count  — task count badge
+  .board__column-tasks  — vertical stack of task cards
+*/
+
+.board {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: max-content;
+  padding-bottom: 24px;
+}
+
+.board__column {
+  display: flex;
+  flex-direction: column;
+  width: 288px;
+  flex-shrink: 0;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 14px 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+.board__column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 12px;
+}
+
+.board__column-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  color: var(--text);
+}
+
+.board__column-count {
+  flex-shrink: 0;
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.board__column-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 8px;
+}
+
+/* ── Task Card ───────────────────────────────────────────── */
+/*
+  .task-card                        — card wrapper article
+  .task-card__title                 — task name p
+  .task-card__assignee              — avatar span (colored via inline style)
+  .task-card__assignee--unassigned  — variant when no member assigned
+*/
+
+.task-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    box-shadow 0.15s ease,
+    transform  0.15s ease,
+    border-color 0.15s ease;
+}
+
+.task-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.task-card__title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.task-card__assignee {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-transform: uppercase;
+  user-select: none;
+  margin-top: 1px;
+  box-shadow: var(--shadow-xs);
+  /* backgroundColor comes from inline style */
+}
+
+.task-card__assignee--unassigned {
+  background: var(--surface-muted) !important;
+  color: var(--text-faint);
+  border: 1.5px dashed var(--border-strong);
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Loading state ───────────────────────────────────────── */
+/*
+  .board-loading — paragraph shown while data fetches
+*/
+
+.board-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+  width: 100%;
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.board-loading::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
